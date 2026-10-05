@@ -131,6 +131,7 @@ int sdrpp_main(int argc, char* argv[]) {
     defConfig["max"] = 0.0;
     defConfig["maximized"] = false;
     defConfig["fullscreen"] = false;
+    defConfig["language"] = "zh-CN";
 
     // Menu
     defConfig["menuElements"] = json::array();
