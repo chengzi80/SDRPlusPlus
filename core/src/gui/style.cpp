@@ -26,30 +26,65 @@ namespace style {
             return false;
         }
 
-        // Create base font range
+        // Include Latin, Cyrillic and common Simplified Chinese glyphs.
         ImFontGlyphRangesBuilder baseBuilder;
         baseBuilder.AddRanges(fonts->GetGlyphRangesDefault());
         baseBuilder.AddRanges(fonts->GetGlyphRangesCyrillic());
+        baseBuilder.AddRanges(fonts->GetGlyphRangesChineseSimplifiedCommon());
         baseBuilder.BuildRanges(&baseRanges);
 
-        // Create big font range
         ImFontGlyphRangesBuilder bigBuilder;
         const ImWchar bigRange[] = { '.', '9', 0 };
         bigBuilder.AddRanges(bigRange);
         bigBuilder.BuildRanges(&bigRanges);
 
-        // Create huge font range
         ImFontGlyphRangesBuilder hugeBuilder;
         const ImWchar hugeRange[] = { 'S', 'S', 'D', 'D', 'R', 'R', '+', '+', ' ', ' ', 0 };
         hugeBuilder.AddRanges(hugeRange);
         hugeBuilder.BuildRanges(&hugeRanges);
-        
-        // Add bigger fonts for frequency select and title
-        baseFont = fonts->AddFontFromFileTTF(((std::string)(resDir + "/fonts/Roboto-Medium.ttf")).c_str(), 16.0f * uiScale, NULL, baseRanges.Data);
-        bigFont = fonts->AddFontFromFileTTF(((std::string)(resDir + "/fonts/Roboto-Medium.ttf")).c_str(), 45.0f * uiScale, NULL, bigRanges.Data);
-        hugeFont = fonts->AddFontFromFileTTF(((std::string)(resDir + "/fonts/Roboto-Medium.ttf")).c_str(), 128.0f * uiScale, NULL, hugeRanges.Data);
 
-        return true;
+        std::string regularFont = resDir + "/fonts/Roboto-Medium.ttf";
+        std::string cjkFont;
+#ifdef _WIN32
+        const char* cjkCandidates[] = {
+            "C:/Windows/Fonts/msyh.ttc",
+            "C:/Windows/Fonts/msyhbd.ttc"
+        };
+#elif defined(__ANDROID__)
+        const char* cjkCandidates[] = {
+            "/system/fonts/NotoSansCJK-Regular.ttc",
+            "/system/fonts/NotoSansCJK-VF.ttc"
+        };
+#else
+        const char* cjkCandidates[] = {
+            "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+            "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",
+            "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc"
+        };
+#endif
+        for (const char* candidate : cjkCandidates) {
+            if (std::filesystem::exists(candidate)) {
+                cjkFont = candidate;
+                break;
+            }
+        }
+
+        if (!cjkFont.empty()) {
+            ImFontConfig cjkConfig;
+            cjkConfig.FontNo = 0;
+            baseFont = fonts->AddFontFromFileTTF(cjkFont.c_str(), 16.0f * uiScale, &cjkConfig, baseRanges.Data);
+            bigFont = fonts->AddFontFromFileTTF(cjkFont.c_str(), 45.0f * uiScale, &cjkConfig, bigRanges.Data);
+            hugeFont = fonts->AddFontFromFileTTF(cjkFont.c_str(), 128.0f * uiScale, &cjkConfig, hugeRanges.Data);
+            flog::info("Loaded CJK font: {0}", cjkFont);
+        }
+        else {
+            baseFont = fonts->AddFontFromFileTTF(regularFont.c_str(), 16.0f * uiScale, NULL, baseRanges.Data);
+            bigFont = fonts->AddFontFromFileTTF(regularFont.c_str(), 45.0f * uiScale, NULL, bigRanges.Data);
+            hugeFont = fonts->AddFontFromFileTTF(regularFont.c_str(), 128.0f * uiScale, NULL, hugeRanges.Data);
+            flog::warn("CJK font not found, Chinese text may not render correctly");
+        }
+
+        return baseFont != NULL && bigFont != NULL && hugeFont != NULL;
     }
 
     void beginDisabled() {
