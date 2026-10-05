@@ -2,6 +2,7 @@
 #include <gui/gui.h>
 #include <core.h>
 #include <gui/style.h>
+#include <gui/i18n.h>
 
 namespace thememenu {
     int themeId;
@@ -41,7 +42,7 @@ namespace thememenu {
 
     void draw(void* ctx) {
         float menuWidth = ImGui::GetContentRegionAvail().x;
-        ImGui::LeftLabel("Theme");
+        ImGui::LeftLabel(gui::i18n::tr("Theme"));
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         if (ImGui::Combo("##theme_select_combo", &themeId, themeNamesTxt.c_str())) {
             applyTheme();
