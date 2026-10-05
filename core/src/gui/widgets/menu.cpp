@@ -2,6 +2,7 @@
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 #include <gui/style.h>
+#include <gui/i18n.h>
 
 Menu::Menu() {
 }
@@ -42,7 +43,7 @@ bool Menu::draw(bool updateStates) {
         }
         if (opt.name == draggedMenuName) {
             ImGui::BeginTooltip();
-            ImGui::Text("%s", draggedMenuName.c_str());
+            ImGui::Text("%s", gui::i18n::tr(draggedMenuName).c_str());
             ImGui::EndTooltip();
             continue;
         }
@@ -54,7 +55,7 @@ bool Menu::draw(bool updateStates) {
             ImVec2 posMax = ImVec2(posMin.x + menuWidth, posMin.y + ImGui::GetFrameHeight());
             style::beginDisabled();
             ImRect orignalRect = window->WorkRect;
-            ImGui::CollapsingHeader((draggedMenuName + "##sdrpp_main_menu_dragging").c_str());
+            ImGui::CollapsingHeader((gui::i18n::tr(draggedMenuName) + "##sdrpp_main_menu_dragging").c_str());
             if (items[draggedOpt.name].inst != NULL) {
                 window->WorkRect = orignalRect;
                 ImVec2 pos = ImGui::GetCursorPos();
@@ -101,7 +102,7 @@ bool Menu::draw(bool updateStates) {
 
         // Draw menu header and menu content. There is a lot of boilerplate because the checkbox has to be drawn before the menu, TODO: fix
         if (updateStates) { ImGui::SetNextItemOpen(opt.open); }
-        if (ImGui::CollapsingHeader((opt.name + "##sdrpp_main_menu").c_str())) {
+        if (ImGui::CollapsingHeader((gui::i18n::tr(opt.name) + "##sdrpp_main_menu").c_str())) {
             if (item.inst != NULL) {
                 window->WorkRect = orginalRect;
                 ImVec2 pos = ImGui::GetCursorPos();
