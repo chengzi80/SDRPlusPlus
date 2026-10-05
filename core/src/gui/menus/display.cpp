@@ -7,6 +7,7 @@
 #include <gui/main_window.h>
 #include <signal_path/signal_path.h>
 #include <gui/style.h>
+#include <gui/i18n.h>
 #include <utils/optionlist.h>
 #include <algorithm>
 
@@ -128,24 +129,24 @@ namespace displaymenu {
 
     void draw(void* ctx) {
         float menuWidth = ImGui::GetContentRegionAvail().x;
-        if (ImGui::Checkbox("Show Waterfall##_sdrpp", &showWaterfall)) {
+        if (ImGui::Checkbox(gui::i18n::isChinese() ? "显示瀑布图##_sdrpp" : "Show Waterfall##_sdrpp", &showWaterfall)) {
             setWaterfallShown(showWaterfall);
         }
 
-        if (ImGui::Checkbox("Full Waterfall Update##_sdrpp", &fullWaterfallUpdate)) {
+        if (ImGui::Checkbox(gui::i18n::isChinese() ? "完整瀑布图更新##_sdrpp" : "Full Waterfall Update##_sdrpp", &fullWaterfallUpdate)) {
             gui::waterfall.setFullWaterfallUpdate(fullWaterfallUpdate);
             core::configManager.acquire();
             core::configManager.conf["fullWaterfallUpdate"] = fullWaterfallUpdate;
             core::configManager.release(true);
         }
 
-        if (ImGui::Checkbox("Lock Menu Order##_sdrpp", &gui::menu.locked)) {
+        if (ImGui::Checkbox(gui::i18n::isChinese() ? "锁定菜单顺序##_sdrpp" : "Lock Menu Order##_sdrpp", &gui::menu.locked)) {
             core::configManager.acquire();
             core::configManager.conf["lockMenuOrder"] = gui::menu.locked;
             core::configManager.release(true);
         }
 
-        if (ImGui::Checkbox("FFT Hold##_sdrpp", &fftHold)) {
+        if (ImGui::Checkbox(gui::i18n::isChinese() ? "FFT 峰值保持##_sdrpp" : "FFT Hold##_sdrpp", &fftHold)) {
             gui::waterfall.setFFTHold(fftHold);
             core::configManager.acquire();
             core::configManager.conf["fftHold"] = fftHold;
@@ -160,7 +161,7 @@ namespace displaymenu {
             core::configManager.release(true);
         }
 
-        if (ImGui::Checkbox("FFT Smoothing##_sdrpp", &fftSmoothing)) {
+        if (ImGui::Checkbox(gui::i18n::isChinese() ? "FFT 平滑##_sdrpp" : "FFT Smoothing##_sdrpp", &fftSmoothing)) {
             gui::waterfall.setFFTSmoothing(fftSmoothing);
             core::configManager.acquire();
             core::configManager.conf["fftSmoothing"] = fftSmoothing;
@@ -176,7 +177,7 @@ namespace displaymenu {
             core::configManager.release(true);
         }
 
-        if (ImGui::Checkbox("SNR Smoothing##_sdrpp", &snrSmoothing)) {
+        if (ImGui::Checkbox(gui::i18n::isChinese() ? "SNR 平滑##_sdrpp" : "SNR Smoothing##_sdrpp", &snrSmoothing)) {
             gui::waterfall.setSNRSmoothing(snrSmoothing);
             core::configManager.acquire();
             core::configManager.conf["snrSmoothing"] = snrSmoothing;
@@ -192,7 +193,7 @@ namespace displaymenu {
             core::configManager.release(true);
         }
 
-        ImGui::LeftLabel("High-DPI Scaling");
+        ImGui::LeftLabel(gui::i18n::isChinese() ? "高 DPI 缩放" : "High-DPI Scaling");
         ImGui::FillWidth();
         if (ImGui::Combo("##sdrpp_ui_scale", &uiScaleId, uiScales.txt)) {
             core::configManager.acquire();
@@ -201,7 +202,7 @@ namespace displaymenu {
             restartRequired = true;
         }
 
-        ImGui::LeftLabel("FFT Framerate");
+        ImGui::LeftLabel(gui::i18n::isChinese() ? "FFT 帧率" : "FFT Framerate");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         if (ImGui::InputInt("##sdrpp_fft_rate", &fftRate, 1, 10)) {
             fftRate = std::max<int>(1, fftRate);
@@ -212,7 +213,7 @@ namespace displaymenu {
             core::configManager.release(true);
         }
 
-        ImGui::LeftLabel("FFT Size");
+        ImGui::LeftLabel(gui::i18n::isChinese() ? "FFT 大小" : "FFT Size");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         if (ImGui::Combo("##sdrpp_fft_size", &fftSizeId, fftSizes.txt)) {
             sigpath::iqFrontEnd.setFFTSize(fftSizes.value(fftSizeId));
@@ -221,9 +222,9 @@ namespace displaymenu {
             core::configManager.release(true);
         }
 
-        ImGui::LeftLabel("FFT Window");
+        ImGui::LeftLabel(gui::i18n::isChinese() ? "FFT 窗函数" : "FFT Window");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
-        if (ImGui::Combo("##sdrpp_fft_window", &selectedWindow, "Rectangular\0Blackman\0Nuttall\0")) {
+        if (ImGui::Combo("##sdrpp_fft_window", &selectedWindow, gui::i18n::isChinese() ? "矩形\0Blackman\0Nuttall\0" : "Rectangular\0Blackman\0Nuttall\0")) {
             sigpath::iqFrontEnd.setFFTWindow(fftWindowList[selectedWindow]);
             core::configManager.acquire();
             core::configManager.conf["fftWindow"] = selectedWindow;
@@ -231,7 +232,7 @@ namespace displaymenu {
         }
 
         if (colorMapNames.size() > 0) {
-            ImGui::LeftLabel("Color Map");
+            ImGui::LeftLabel(gui::i18n::isChinese() ? "颜色映射" : "Color Map");
             ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
             if (ImGui::Combo("##_sdrpp_color_map_sel", &colorMapId, colorMapNamesTxt.c_str())) {
                 colormaps::Map map = colormaps::maps[colorMapNames[colorMapId]];
@@ -241,11 +242,11 @@ namespace displaymenu {
                 core::configManager.release(true);
                 colorMapAuthor = map.author;
             }
-            ImGui::Text("Color map Author: %s", colorMapAuthor.c_str());
+            ImGui::Text(gui::i18n::isChinese() ? "颜色映射作者：%s" : "Color map Author: %s", colorMapAuthor.c_str());
         }
 
         if (restartRequired) {
-            ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Restart required.");
+            ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), gui::i18n::isChinese() ? "需要重启程序。" : "Restart required.");
         }
     }
 }
