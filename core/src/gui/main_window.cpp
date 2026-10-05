@@ -27,6 +27,24 @@
 #include <gui/colormaps.h>
 #include <gui/widgets/snr_meter.h>
 #include <gui/tuner.h>
+#include <gui/i18n.h>
+
+static void drawLanguageMenu(void*) {
+    const char* languages[] = { "English", "Chinese" };
+    int current = gui::i18n::isChinese() ? 1 : 0;
+    if (ImGui::RadioButton(languages[0], current == 0)) {
+        gui::i18n::setLanguage("en");
+        core::configManager.acquire();
+        core::configManager.conf["language"] = "en";
+        core::configManager.release(true);
+    }
+    if (ImGui::RadioButton(languages[1], current == 1)) {
+        gui::i18n::setLanguage("zh-CN");
+        core::configManager.acquire();
+        core::configManager.conf["language"] = "zh-CN";
+        core::configManager.release(true);
+    }
+}
 
 void MainWindow::init() {
     LoadingScreen::show("Initializing UI");
@@ -39,7 +57,10 @@ void MainWindow::init() {
     json menuElements = core::configManager.conf["menuElements"];
     std::string modulesDir = core::configManager.conf["modulesDirectory"];
     std::string resourcesDir = core::configManager.conf["resourcesDirectory"];
+    std::string language = core::configManager.conf.contains("language") ? core::configManager.conf["language"].get<std::string>() : "zh-CN";
     core::configManager.release();
+
+    gui::i18n::setLanguage(language);
 
     // Assert that directories are absolute
     modulesDir = std::filesystem::absolute(modulesDir).string();
@@ -77,6 +98,7 @@ void MainWindow::init() {
     gui::menu.registerEntry("Theme", thememenu::draw, NULL);
     gui::menu.registerEntry("VFO Color", vfo_color_menu::draw, NULL);
     gui::menu.registerEntry("Module Manager", module_manager_menu::draw, NULL);
+    gui::menu.registerEntry("Language", drawLanguageMenu, NULL);
 
     gui::freqSelect.init();
 
@@ -258,7 +280,7 @@ void MainWindow::vfoAddedHandler(VFOManager::VFO* vfo, void* ctx) {
 }
 
 void MainWindow::draw() {
-    ImGui::Begin("Main", NULL, WINDOW_FLAGS);
+    ImGui::Begin(gui::i18n::tr("Main"), NULL, WINDOW_FLAGS);
     ImVec4 textCol = ImGui::GetStyleColorVec4(ImGuiCol_Text);
 
     ImGui::WaterfallVFO* vfo = NULL;
@@ -501,29 +523,29 @@ void MainWindow::draw() {
             firstMenuRender = false;
         }
 
-        if (ImGui::CollapsingHeader("Debug")) {
-            ImGui::Text("Frame time: %.3f ms/frame", ImGui::GetIO().DeltaTime * 1000.0f);
-            ImGui::Text("Framerate: %.1f FPS", ImGui::GetIO().Framerate);
-            ImGui::Text("Center Frequency: %.0f Hz", gui::waterfall.getCenterFrequency());
-            ImGui::Text("Source name: %s", sourceName.c_str());
-            ImGui::Checkbox("Show demo window", &demoWindow);
-            ImGui::Text("ImGui version: %s", ImGui::GetVersion());
+        if (ImGui::CollapsingHeader(gui::i18n::tr("Debug"))) {
+            ImGui::Text(gui::i18n::tr("Frame time: %.3f ms/frame"), ImGui::GetIO().DeltaTime * 1000.0f);
+            ImGui::Text(gui::i18n::tr("Framerate: %.1f FPS"), ImGui::GetIO().Framerate);
+            ImGui::Text(gui::i18n::tr("Center Frequency: %.0f Hz"), gui::waterfall.getCenterFrequency());
+            ImGui::Text(gui::i18n::tr("Source name: %s"), sourceName.c_str());
+            ImGui::Checkbox(gui::i18n::tr("Show demo window"), &demoWindow);
+            ImGui::Text(gui::i18n::tr("ImGui version: %s"), ImGui::GetVersion());
 
             // ImGui::Checkbox("Bypass buffering", &sigpath::iqFrontEnd.inputBuffer.bypass);
 
             // ImGui::Text("Buffering: %d", (sigpath::iqFrontEnd.inputBuffer.writeCur - sigpath::iqFrontEnd.inputBuffer.readCur + 32) % 32);
 
-            if (ImGui::Button("Test Bug")) {
+            if (ImGui::Button(gui::i18n::tr("Test Bug"))) {
                 flog::error("Will this make the software crash?");
             }
 
-            if (ImGui::Button("Testing something")) {
+            if (ImGui::Button(gui::i18n::tr("Testing something"))) {
                 gui::menu.order[0].open = true;
                 firstMenuRender = true;
             }
 
-            ImGui::Checkbox("WF Single Click", &gui::waterfall.VFOMoveSingleClick);
-            ImGui::Checkbox("Lock Menu Order", &gui::menu.locked);
+            ImGui::Checkbox(gui::i18n::tr("WF Single Click"), &gui::waterfall.VFOMoveSingleClick);
+            ImGui::Checkbox(gui::i18n::tr("Lock Menu Order"), &gui::menu.locked);
 
             ImGui::Spacing();
         }
@@ -612,8 +634,8 @@ void MainWindow::draw() {
     ImGui::NextColumn();
     ImGui::BeginChild("WaterfallControls");
 
-    ImGui::SetCursorPosX((ImGui::GetWindowSize().x / 2.0) - (ImGui::CalcTextSize("Zoom").x / 2.0));
-    ImGui::TextUnformatted("Zoom");
+    ImGui::SetCursorPosX((ImGui::GetWindowSize().x / 2.0) - (ImGui::CalcTextSize(gui::i18n::tr("Zoom")).x / 2.0));
+    ImGui::TextUnformatted(gui::i18n::tr("Zoom"));
     ImGui::SetCursorPosX((ImGui::GetWindowSize().x / 2.0) - 10 * style::uiScale);
     ImVec2 wfSliderSize(20.0 * style::uiScale, 150.0 * style::uiScale);
     if (ImGui::VSliderFloat("##_7_", wfSliderSize, &bw, 1.0, 0.0, "")) {
@@ -632,8 +654,8 @@ void MainWindow::draw() {
 
     ImGui::NewLine();
 
-    ImGui::SetCursorPosX((ImGui::GetWindowSize().x / 2.0) - (ImGui::CalcTextSize("Max").x / 2.0));
-    ImGui::TextUnformatted("Max");
+    ImGui::SetCursorPosX((ImGui::GetWindowSize().x / 2.0) - (ImGui::CalcTextSize(gui::i18n::tr("Max")).x / 2.0));
+    ImGui::TextUnformatted(gui::i18n::tr("Max"));
     ImGui::SetCursorPosX((ImGui::GetWindowSize().x / 2.0) - 10 * style::uiScale);
     if (ImGui::VSliderFloat("##_8_", wfSliderSize, &fftMax, 0.0, -160.0f, "")) {
         fftMax = std::max<float>(fftMax, fftMin + 10);
@@ -644,8 +666,8 @@ void MainWindow::draw() {
 
     ImGui::NewLine();
 
-    ImGui::SetCursorPosX((ImGui::GetWindowSize().x / 2.0) - (ImGui::CalcTextSize("Min").x / 2.0));
-    ImGui::TextUnformatted("Min");
+    ImGui::SetCursorPosX((ImGui::GetWindowSize().x / 2.0) - (ImGui::CalcTextSize(gui::i18n::tr("Min")).x / 2.0));
+    ImGui::TextUnformatted(gui::i18n::tr("Min"));
     ImGui::SetCursorPosX((ImGui::GetWindowSize().x / 2.0) - 10 * style::uiScale);
     ImGui::SetItemUsingMouseWheel();
     if (ImGui::VSliderFloat("##_9_", wfSliderSize, &fftMin, 0.0, -160.0f, "")) {
