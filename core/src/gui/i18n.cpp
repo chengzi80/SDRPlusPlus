@@ -33,7 +33,15 @@ namespace gui::i18n {
         {"Initializing UI", "正在初始化界面"},
         {"Loading modules", "正在加载模块"},
         {"Loading color maps", "正在加载颜色映射"},
-        {"Loading configuration", "正在加载配置"}
+        {"Loading configuration", "正在加载配置"},
+        {"Direct Sampling", "直接采样"},
+        {"PPM Correction", "PPM 频率校正"},
+        {"Gain", "增益"},
+        {"Theme", "主题"},
+        {"Source", "信号源"},
+        {"Sinks", "输出"},
+        {"Band Plan", "频段计划"},
+        {"Display", "显示"}
     };
 
     void setLanguage(const std::string& language) {
