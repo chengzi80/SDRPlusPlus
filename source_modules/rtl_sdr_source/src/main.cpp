@@ -6,6 +6,7 @@
 #include <gui/style.h>
 #include <config.h>
 #include <gui/smgui.h>
+#include <gui/i18n.h>
 #include <rtl-sdr.h>
 
 #ifdef __ANDROID__
@@ -52,7 +53,8 @@ const char* sampleRatesTxt[] = {
     "3.2MHz"
 };
 
-const char* directSamplingModesTxt = "Disabled\0I branch\0Q branch\0";
+const char* directSamplingModesTxtEn = "Disabled\0I branch\0Q branch\0";
+const char* directSamplingModesTxtZh = "禁用\0I 支路\0Q 支路\0";
 
 class RTLSDRSourceModule : public ModuleManager::Instance {
 public:
@@ -387,7 +389,7 @@ private:
         SmGui::SameLine();
         SmGui::FillWidth();
         SmGui::ForceSync();
-        if (SmGui::Button(CONCAT("Refresh##_rtlsdr_refr_", _this->name)/*, ImVec2(refreshBtnWdith, 0)*/)) {
+        if (SmGui::Button(CONCAT(gui::i18n::isChinese() ? "刷新##_rtlsdr_refr_" : "Refresh##_rtlsdr_refr_", _this->name)/*, ImVec2(refreshBtnWdith, 0)*/)) {
             _this->refresh();
             _this->selectByName(_this->selectedDevName);
             core::setInputSampleRate(_this->sampleRate);
@@ -398,7 +400,7 @@ private:
         // Rest of rtlsdr config here
         SmGui::LeftLabel("Direct Sampling");
         SmGui::FillWidth();
-        if (SmGui::Combo(CONCAT("##_rtlsdr_ds_", _this->name), &_this->directSamplingMode, directSamplingModesTxt)) {
+        if (SmGui::Combo(CONCAT("##_rtlsdr_ds_", _this->name), &_this->directSamplingMode, gui::i18n::isChinese() ? directSamplingModesTxtZh : directSamplingModesTxtEn)) {
             if (_this->running) {
                 rtlsdr_set_direct_sampling(_this->openDev, _this->directSamplingMode);
 
@@ -471,7 +473,7 @@ private:
         
         if (_this->tunerAgc || _this->gainList.size() == 0) { SmGui::EndDisabled(); }
 
-        if (SmGui::Checkbox(CONCAT("Bias T##_rtlsdr_rtl_biast_", _this->name), &_this->biasT)) {
+        if (SmGui::Checkbox(CONCAT(gui::i18n::isChinese() ? "偏置电源 Bias T##_rtlsdr_rtl_biast_" : "Bias T##_rtlsdr_rtl_biast_", _this->name), &_this->biasT)) {
             if (_this->running) {
                 rtlsdr_set_bias_tee(_this->openDev, _this->biasT);
             }
@@ -482,7 +484,7 @@ private:
             }
         }
 
-        if (SmGui::Checkbox(CONCAT("Offset Tuning##_rtlsdr_rtl_ofs_", _this->name), &_this->offsetTuning)) {
+        if (SmGui::Checkbox(CONCAT(gui::i18n::isChinese() ? "偏移调谐 Offset Tuning##_rtlsdr_rtl_ofs_" : "Offset Tuning##_rtlsdr_rtl_ofs_", _this->name), &_this->offsetTuning)) {
             if (_this->running) {
                 rtlsdr_set_offset_tuning(_this->openDev, _this->offsetTuning);
             }
@@ -493,7 +495,7 @@ private:
             }
         }
 
-        if (SmGui::Checkbox(CONCAT("RTL AGC##_rtlsdr_rtl_agc_", _this->name), &_this->rtlAgc)) {
+        if (SmGui::Checkbox(CONCAT(gui::i18n::isChinese() ? "RTL 自动增益##_rtlsdr_rtl_agc_" : "RTL AGC##_rtlsdr_rtl_agc_", _this->name), &_this->rtlAgc)) {
             if (_this->running) {
                 rtlsdr_set_agc_mode(_this->openDev, _this->rtlAgc);
             }
@@ -505,7 +507,7 @@ private:
         }
 
         SmGui::ForceSync();
-        if (SmGui::Checkbox(CONCAT("Tuner AGC##_rtlsdr_tuner_agc_", _this->name), &_this->tunerAgc)) {
+        if (SmGui::Checkbox(CONCAT(gui::i18n::isChinese() ? "调谐器自动增益##_rtlsdr_tuner_agc_" : "Tuner AGC##_rtlsdr_tuner_agc_", _this->name), &_this->tunerAgc)) {
             if (_this->running) {
                 if (_this->tunerAgc) {
                     rtlsdr_set_tuner_gain_mode(_this->openDev, 0);
