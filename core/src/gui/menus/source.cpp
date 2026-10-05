@@ -4,6 +4,7 @@
 #include <core.h>
 #include <gui/main_window.h>
 #include <gui/style.h>
+#include <gui/i18n.h>
 #include <signal_path/signal_path.h>
 #include <utils/optionlist.h>
 #include <gui/dialogs/dialog_box.h>
@@ -133,8 +134,8 @@ namespace sourcemenu {
         namedOffsets.clear();
 
         // Define special offset modes
-        offsets.define("None", OFFSET_ID_NONE);
-        offsets.define("Manual", OFFSET_ID_MANUAL);
+        offsets.define(gui::i18n::isChinese() ? "无" : "None", OFFSET_ID_NONE);
+        offsets.define(gui::i18n::isChinese() ? "手动" : "Manual", OFFSET_ID_MANUAL);
 
         // Acquire the config file
         core::configManager.acquire();
@@ -159,7 +160,7 @@ namespace sourcemenu {
         reloadOffsets();
 
         // Define decimation values
-        decimations.define(1, "None", 1);
+        decimations.define(1, gui::i18n::isChinese() ? "无" : "None", 1);
         decimations.define(2, "2x", 2);
         decimations.define(4, "4x", 4);
         decimations.define(8, "8x", 8);
@@ -242,37 +243,37 @@ namespace sourcemenu {
 
         float menuWidth = ImGui::GetContentRegionAvail().x;
 
-        const char* id = "Add offset##sdrpp_add_offset_dialog_";
+        const char* id = gui::i18n::isChinese() ? "添加偏移##sdrpp_add_offset_dialog_" : "Add offset##sdrpp_add_offset_dialog_";
         ImGui::OpenPopup(id);
 
         if (ImGui::BeginPopup(id, ImGuiWindowFlags_NoResize)) {
-            ImGui::LeftLabel("Name");
+            ImGui::LeftLabel(gui::i18n::isChinese() ? "名称" : "Name");
             ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
             ImGui::InputText("##sdrpp_add_offset_name", newOffsetName, 1023);
 
-            ImGui::LeftLabel("Offset");
+            ImGui::LeftLabel(gui::i18n::isChinese() ? "偏移" : "Offset");
             ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
             ImGui::InputDouble("##sdrpp_add_offset_offset", &newOffset);
 
             bool nameExists = offsets.nameExists(newOffsetName);
-            bool reservedName = !strcmp(newOffsetName, "None") || !strcmp(newOffsetName, "Manual");
+            bool reservedName = !strcmp(newOffsetName, gui::i18n::isChinese() ? "无" : "None") || !strcmp(newOffsetName, gui::i18n::isChinese() ? "手动" : "Manual");
             bool denyApply = !newOffsetName[0] || nameExists || reservedName;
 
             if (nameExists) {
-                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "An offset with the given name already exists.");
+                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), gui::i18n::isChinese() ? "该名称的偏移已存在。" : "An offset with the given name already exists.");
             }
             else if (reservedName) {
-                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "The given name is reserved.");
+                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), gui::i18n::isChinese() ? "该名称为保留名称。" : "The given name is reserved.");
             }
 
             if (denyApply) { style::beginDisabled(); }
-            if (ImGui::Button("Apply")) {
+            if (ImGui::Button(gui::i18n::isChinese() ? "应用" : "Apply")) {
                 addOffset(newOffsetName, newOffset);
                 open = false;
             }
             if (denyApply) { style::endDisabled(); }
             ImGui::SameLine();
-            if (ImGui::Button("Cancel")) {
+            if (ImGui::Button(gui::i18n::isChinese() ? "取消" : "Cancel")) {
                 open = false;
             }
             ImGui::EndPopup();
@@ -301,21 +302,21 @@ namespace sourcemenu {
 
         sigpath::sourceManager.showSelectedMenu();
 
-        if (ImGui::Checkbox("IQ Correction##_sdrpp_iq_corr", &iqCorrection)) {
+        if (ImGui::Checkbox(gui::i18n::isChinese() ? "IQ 校正##_sdrpp_iq_corr" : "IQ Correction##_sdrpp_iq_corr", &iqCorrection)) {
             sigpath::iqFrontEnd.setDCBlocking(iqCorrection);
             core::configManager.acquire();
             core::configManager.conf["iqCorrection"] = iqCorrection;
             core::configManager.release(true);
         }
 
-        if (ImGui::Checkbox("Invert IQ##_sdrpp_inv_iq", &invertIQ)) {
+        if (ImGui::Checkbox(gui::i18n::isChinese() ? "反转 IQ##_sdrpp_inv_iq" : "Invert IQ##_sdrpp_inv_iq", &invertIQ)) {
             sigpath::iqFrontEnd.setInvertIQ(invertIQ);
             core::configManager.acquire();
             core::configManager.conf["invertIQ"] = invertIQ;
             core::configManager.release(true);
         }
 
-        ImGui::LeftLabel("Offset mode");
+        ImGui::LeftLabel(gui::i18n::isChinese() ? "偏移模式" : "Offset mode");
         ImGui::SetNextItemWidth(itemWidth - ImGui::GetCursorPosX() - 2.0f*(lineHeight + 1.5f*spacing));
         if (ImGui::Combo("##_sdrpp_offset", &offsetId, offsets.txt)) {
             selectOffsetById(offsetId);
@@ -334,13 +335,13 @@ namespace sourcemenu {
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() - spacing);
         if (ImGui::Button("+##_sdrpp_offset_add_", ImVec2(lineHeight + 0.5f*spacing, 0))) {
-            strcpy(newOffsetName, "New Offset");
+            strcpy(newOffsetName, gui::i18n::isChinese() ? "新建偏移" : "New Offset");
             showAddOffsetDialog = true;
         }
 
         // Offset delete confirmation
         if (ImGui::GenericDialog("sdrpp_del_offset_confirm", showDelOffsetDialog, GENERIC_DIALOG_BUTTONS_YES_NO, []() {
-            ImGui::Text("Deleting offset named \"%s\". Are you sure?", delOffsetName.c_str());
+            ImGui::Text(gui::i18n::isChinese() ? "确定要删除名为“%s”的偏移吗？" : "Deleting offset named \"%s\". Are you sure?", delOffsetName.c_str());
         }) == GENERIC_DIALOG_BUTTON_YES) {
             delOffset(delOffsetName);
         }
@@ -348,7 +349,7 @@ namespace sourcemenu {
         // Offset add diaglog
         if (showAddOffsetDialog) { showAddOffsetDialog = addOffsetDialog(); }
 
-        ImGui::LeftLabel("Offset");
+        ImGui::LeftLabel(gui::i18n::isChinese() ? "偏移" : "Offset");
         ImGui::FillWidth();
         if (offsetId == OFFSET_ID_MANUAL) {
             if (ImGui::InputDouble("##freq_offset", &manualOffset, 1.0, 100.0)) {
@@ -365,7 +366,7 @@ namespace sourcemenu {
         }
 
         if (running) { style::beginDisabled(); }
-        ImGui::LeftLabel("Decimation");
+        ImGui::LeftLabel(gui::i18n::isChinese() ? "抽取" : "Decimation");
         ImGui::FillWidth();
         if (ImGui::Combo("##source_decim", &decimId, decimations.txt)) {
             sigpath::iqFrontEnd.setDecimation(decimations.value(decimId));
